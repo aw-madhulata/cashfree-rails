@@ -1,0 +1,38 @@
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+<script type="module">
+(function(){
+    const cashfree = Cashfree({
+	    mode:"<%= PAYMENTMODES %>" //or production
+    });
+    $("#paymentButton").click(function(){          
+    $.post("/generate_cashfree_token", {
+    	order_id: "<%= @order_id %>", 
+    	amount: "<%= @amount %>",
+    	email: "<%= @email %>", 
+    	mobile: "<%= @mobile %>", 
+    }).done(function(data) {
+        if(data.payment_session_id){
+        	console.clear();
+        	console.log(data);
+		      let checkoutOptions = {
+		          paymentSessionId: data.payment_session_id,
+		          returnUrl: "<%= CASHFREE_RETURN_URL %>",
+		      }
+		      cashfree.checkout(checkoutOptions).then(function(result){
+		      if(result.error){
+		          console.log(result.error.message)
+		      }
+		      if(result.redirect){
+		          console.log("Redirection")
+		      }
+		      });
+        }else{
+          console.log("Error")
+        }
+    });  
+    return false;       
+    });
+
+})();
+</script>
+<a href="#" id="paymentButton">Pay now </a>
